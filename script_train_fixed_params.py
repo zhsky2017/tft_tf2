@@ -53,7 +53,8 @@ def main(expt_name,
          model_folder,
          data_csv_path,
          data_formatter,
-         use_testing_mode=False):
+         use_testing_mode=False
+         save_pb=False):
     """Trains tft based on defined model params.
 
     Args:
@@ -146,10 +147,9 @@ def main(expt_name,
         model = ModelClass(best_params, use_cudnn=use_gpu)
 
         model.load(opt_manager.hyperparam_folder)
-
         print("Computing best validation loss")
         val_loss = model.evaluate(valid)
-
+        
         print("Computing test loss")
         output_map = model.predict(test, return_targets=True)
         targets = data_formatter.format_predictions(output_map["targets"])
@@ -213,15 +213,24 @@ if __name__ == "__main__":
             choices=["yes", "no"],
             default="no",
             help="Whether to use gpu for training.")
+        
+        parser.add_argument(
+            "save_pb",
+            metavar="g",
+            type=str,
+            nargs="?",
+            choices=["yes", "no"],
+            default="no",
+            help="Whether to save model to pb (save to current directory default")
 
         args = parser.parse_known_args()[0]
 
         root_folder = None if args.output_folder == "." else args.output_folder
 
-        return args.expt_name, root_folder, args.use_gpu == "yes"
+        return args.expt_name, root_folder, args.use_gpu == "yes", args.save_pb
 
 
-    name, output_folder, use_tensorflow_with_gpu = get_args()
+    name, output_folder, use_tensorflow_with_gpu, save_pb = get_args()
 
     print("Using output folder {}".format(output_folder))
 
@@ -235,4 +244,5 @@ if __name__ == "__main__":
         model_folder=os.path.join(config.model_folder, "fixed"),
         data_csv_path=config.data_csv_path,
         data_formatter=formatter,
+        save_pb=save_pb,
         use_testing_mode=True)  # Change to false to use original default params
