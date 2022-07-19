@@ -53,7 +53,7 @@ def main(expt_name,
          model_folder,
          data_csv_path,
          data_formatter,
-         use_testing_mode=False
+         use_testing_mode=False,
          save_pb=False):
     """Trains tft based on defined model params.
 
