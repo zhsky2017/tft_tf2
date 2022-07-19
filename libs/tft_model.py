@@ -1345,6 +1345,22 @@ class TemporalFusionTransformer(object):
         # Allows for direct serialisation of tensorflow variables to avoid spurious
         # issue with Keras that leads to different performance evaluation results
         # when model is reloaded (https://github.com/keras-team/keras/issues/4875).
+        import tensorflow.compat.v1 as tf
+        tf.disable_v2_behavior()
+        from tensorflow.python.framework import graph_util
+        init_op = tf.global_variables_initializer()
+        sess = tf.keras.backend.get_session()
+        sess.run(init_op)
+        output_name =  "TemporalFusionTransformer/time_distributed_59/Reshape_1"
+        graph_def = tf.get_default_graph().as_graph_def()
+
+        output_graph_def = graph_util.convert_variables_to_constants(sess, graph_def, ([output_name]))
+        # 将导出的模型存入文件
+        with tf.gfile.GFile('/content/tft_tf2/TFT.pb', 'wb') as f:
+            f.write(output_graph_def.SerializeToString())
+
+        print("Save pb!")
+
 
         utils.save(
             tf.compat.v1.keras.backend.get_session(),
